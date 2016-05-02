@@ -1,0 +1,20 @@
+# Compiled client side stuff
+client/css/console.css
+/client/js/build/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+/node_modules/
+/markup/
+/screenshots/
+/build/
+npm-debug.log
+questions.md
+/client/css/build/
+client/js/src/templates.js
+/dist/
+stderr.log
+stdout.log
