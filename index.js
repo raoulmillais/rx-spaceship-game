@@ -13,6 +13,7 @@ const config = {
   playerColor: '#f00',
   playerShotFrequency: 200,
   playerShotColor: '#ff0',
+  pointsPerHit: 10,
   shotSpeed: 15,
   enemyFrequency: 1500,
   enemyShootFrequency: 750,
@@ -30,7 +31,7 @@ function createStar() {
 
 function moveStar(star) {
   if (star.y >= canvas.height) star.y = 0;
-  star.y += 3;
+  star.y += star.size;
 }
 
 function paintSpace() {
@@ -63,7 +64,7 @@ function drawTriangle(x, y, width, color, direction) {
   ctx.fill();
 }
 
-// PLAYERS
+// PLAYER & ENEMIES
 function paintPlayer(player) {
   drawTriangle(player.x, player.y, 20, config.playerColor, 'up');
 }
@@ -74,8 +75,27 @@ function createPlayerStream() {
     .startWith({x: canvas.width / 2, y: config.playerYPos});
 }
 
-function paintShots(shots, direction) {
+function checkTargetCollisions(shot, targets) {
+  let hit = false;
+
+  for (let i = 0; i < targets.length; i++) {
+    let target = targets[i];
+    if (target && !target.isDead && collision(shot, target)) {
+      target.isDead = true;
+      hit = true;
+      break;
+    }
+  }
+
+  return hit;
+}
+
+function paintShots(shots, targets, direction) {
   shots.forEach(shot => {
+    if (checkTargetCollisions(shot, targets)) {
+      shot.x = shot.y = -100;
+    }
+
     direction === 'up'
       ? shot.y -= config.shotSpeed
       : shot.y += config.shotSpeed;
@@ -109,7 +129,7 @@ function createEnemy() {
   };
 }
 
-function paintEnemies(enemies) {
+function paintEnemies(enemies, player) {
   enemies.forEach(enemy => {
     enemy.y += 5;
     enemy.x += Math.floor(Math.random() * (15 - -15 + 1)) + -15;
@@ -118,7 +138,7 @@ function paintEnemies(enemies) {
       drawTriangle(enemy.x, enemy.y, 20, config.enemyColor, 'down');
     }
 
-    paintShots(enemy.shots, 'down');
+    paintShots(enemy.shots, [player], 'down');
   });
 }
 
@@ -128,8 +148,9 @@ function shotIsVisible(shot) {
 }
 
 function collision(target1, target2) {
-  return (target1.x > target2.x - 20 && target1.x < target2.x + 20) &&
+  const result = (target1.x > target2.x - 20 && target1.x < target2.x + 20) &&
     (target1.y > target2.y -20 && target1.y < target2.y + 20);
+  return result;
 }
 
 function createEnemyStream() {
@@ -147,7 +168,6 @@ function createEnemyStream() {
     }, []);
 }
 
-
 // COORDINATION
 function createGameStream() {
   const star$ = createStarStream();
@@ -158,18 +178,36 @@ function createGameStream() {
   return Rx.Observable.combineLatest(star$, player$, enemies$, playerShots$,
       (stars, player, enemies, playerShots) =>
         ({stars, player, enemies, playerShots}))
-    .sample(config.starSpeed);
+    .sample(config.starSpeed)
+    .takeWhile(actors => !actors.player.isDead);
 }
 
 
 // MAIN LOOP
 function paintScene(actors) {
   paintStars(actors.stars);
-  paintPlayer(actors.player);
-  paintEnemies(actors.enemies);
-  paintShots(actors.playerShots, 'up');
+  paintPlayer(actors.player, actors.enemies);
+  paintEnemies(actors.enemies, actors.player);
+  paintShots(actors.playerShots, actors.enemies, 'up');
 }
 
+function paintStart() {
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'regular 32px sans-serif';
+  ctx.fillText('Click to start', canvas.width / 2, canvas.height / 2);
+}
+
+function paintGameOver() {
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#f00';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+}
+
+paintStart();
 const game$ = createGameStream();
 
-game$.subscribe(paintScene);
+game$.subscribe(paintScene, console.error, paintGameOver);
