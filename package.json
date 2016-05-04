@@ -5,15 +5,16 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rm build/* dist/*",
-    "start": "NODE_PATH=./dist/ node dist/server.js",
-    "build:client": "NODE_PATH=./lib/ tsc --allowJs --outDir dist lib/client.js && browserify dist/client.js -o build/bundle.js",
-    "build:server": "mkdir -p dist && NODE_PATH=./lib/ tsc --allowJs --sourceMap --outDir dist lib/server.js",
+    "start": "node dist/server.js",
+    "build:client": "tsc --allowJs --sourceMap --outDir dist lib/client.ts && browserify dist/client.js -o build/bundle.js",
+    "build:server": "mkdir -p dist && tsc --allowJs --sourceMap --outDir dist lib/server.js",
     "build": "npm-run-all build:*",
     "watch:test": "nodemon -e js -x 'npm-run-all -s build:server test:unit'",
     "watch:client": "nodemon -e js -w lib -x 'npm run build:client'",
     "watch:server": "nodemon -e js -w lib -x 'npm-run-all build:server && node dist/server.js'",
     "watch": "npm-run-all -p watch:client watch:server",
     "pretest": "npm run build",
+    "postinstall": "typings install",
     "test": "mocha --compilers js:babel-register test/unit --recursive"
   },
   "repository": {

@@ -1,4 +1,4 @@
-import * as config from 'config';
+import config from './config';
 import * as Rx from 'rx';
 
 const canvas = document.createElement('canvas');
@@ -9,25 +9,27 @@ canvas.height = document.documentElement.clientHeight;
 
 config.playerYPos = canvas.height - 30;
 
-function createStar() {
+interface Star { x: number, y: number, size: number };
+
+function createStar() : Star {
   return {
-    x: parseInt(Math.random() * canvas.width),
-    y: parseInt(Math.random() * canvas.height),
+    x: Math.round(Math.random() * canvas.width),
+    y: Math.round(Math.random() * canvas.height),
     size: Math.random() * 2 + 1
   };
 }
 
-function moveStar(star) {
+function moveStar(star) : void {
   if (star.y >= canvas.height) { star.y = 0; }
   star.y += star.size;
 }
 
-function paintSpace() {
+function paintSpace() : void {
   ctx.fillStyle = config.spaceColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function paintStars(stars) {
+function paintStars(stars) : void {
   paintSpace();
   ctx.fillStyle = config.starColor;
   stars.forEach(star => ctx.fillRect(star.x, star.y, star.size, star.size));
@@ -111,7 +113,7 @@ function createPlayerShotStream(player$) {
 
 function createEnemy() {
   return {
-    x: parseInt(Math.random() * canvas.width),
+    x: Math.round(Math.random() * canvas.width),
     y: -30,
     shots: []
   };
@@ -174,7 +176,7 @@ function createGameStream() {
 // MAIN LOOP
 function paintScene(actors) {
   paintStars(actors.stars);
-  paintPlayer(actors.player, actors.enemies);
+  paintPlayer(actors.player);
   paintEnemies(actors.enemies, actors.player);
   paintShots(actors.playerShots, actors.enemies, 'up');
 }

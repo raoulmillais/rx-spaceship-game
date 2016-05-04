@@ -1,6 +1,12 @@
 {
     "compilerOptions": {
         "module": "CommonJS",
+        "sourcemap": true,
         "target": "es5"
-    }
+    },
+    "files": [ 
+      "lib/client.ts",
+      "client/config.ts",
+      "node_modules/rx/ts/rx.all.ds.ts"
+    ]
 }
