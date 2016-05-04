@@ -2,16 +2,18 @@
   "name": "rx-space-invaders",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build:client": "browserify -d lib/client.js -o build/bundle.js",
-    "build:server": "mkdir -p dist && babel -s inline lib -d dist",
+    "clean": "rm build/* dist/*",
+    "start": "NODE_PATH=./dist/ node dist/server.js",
+    "build:client": "NODE_PATH=./lib/ tsc --allowJs --outDir dist lib/client.js && browserify dist/client.js -o build/bundle.js",
+    "build:server": "mkdir -p dist && NODE_PATH=./lib/ tsc --allowJs --sourceMap --outDir dist lib/server.js",
     "build": "npm-run-all build:*",
     "watch:test": "nodemon -e js -x 'npm-run-all -s build:server test:unit'",
-    "watch:client": "nodemon -e js -w lib -x 'npm run build:client",
-    "watch:server": "NODE_PATH=./dist/ nodemon -e js -x 'npm run build:server && node dist/index.js' | bunyan",
+    "watch:client": "nodemon -e js -w lib -x 'npm run build:client'",
+    "watch:server": "nodemon -e js -w lib -x 'npm-run-all build:server && node dist/server.js'",
     "watch": "npm-run-all -p watch:client watch:server",
-    "pretest": "npm-run-all -s build:client build:server",
+    "pretest": "npm run build",
     "test": "mocha --compilers js:babel-register test/unit --recursive"
   },
   "repository": {
@@ -31,7 +33,10 @@
     "babelify": "^7.3.0",
     "browserify": "^13.0.0",
     "eslint": "^2.9.0",
-    "npm-run-all": "^1.8.0"
+    "npm-run-all": "^1.8.0",
+    "tsify": "^0.15.3",
+    "typescript": "^1.8.10",
+    "typings": "^0.8.1"
   },
   "dependencies": {
     "express": "^4.13.4",

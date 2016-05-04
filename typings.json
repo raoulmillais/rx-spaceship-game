@@ -1,0 +1,6 @@
+{
+  "ambientDependencies": {
+    "express": "registry:dt/express#4.0.0+20160317120654",
+    "rx.all": "registry:dt/rx.all#2.2.28+20160316155526"
+  }
+}
